@@ -18,14 +18,25 @@ const log = logger('tx')
  * @return {object} {inputs: TransactionInput[], change: TransactionOutput[] }
  */
 export const calculateInputs = (balances, intents, extraCost = 0, strategy = null, fees = 0) => {
+  console.log("balances", balances)
+  console.log("intents", intents)
+  console.log("extraCost", extraCost)
+  console.log("strategy", strategy)
+  console.log("fees", fees)
+
   if (intents === null) intents = []
   if (strategy === null) strategy = defaultCalculationStrategy
   const requiredAssets = intents.reduce((assets, intent) => {
     assets[intent.assetId] ? assets[intent.assetId] = assets[intent.assetId].add(intent.value) : assets[intent.assetId] = intent.value
     return assets
   }, {})
+  console.log("extra cost: ", extraCost)
+
   // Add GAS cost and fees in
   extraCost = new Fixed8(extraCost).add(fees)
+
+  console.log("calculated extra cost: ", extraCost)
+
   if (extraCost.gt(0)) {
     if (requiredAssets[ASSET_ID.GAS]) {
       requiredAssets[ASSET_ID.GAS] = requiredAssets[ASSET_ID.GAS].add(extraCost)
