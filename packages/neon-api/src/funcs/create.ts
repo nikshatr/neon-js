@@ -4,7 +4,8 @@ import {
   ClaimGasConfig,
   DoInvokeConfig,
   SendAssetConfig,
-  SetupVoteConfig
+  SetupVoteConfig,
+  DoInvokeWithSubsidy
 } from "./types";
 
 export async function createClaimTx(
@@ -47,6 +48,32 @@ export async function createInvocationTx(
   );
   config.tx.calculate(
     config.balance || new wallet.Balance(),
+    undefined,
+    config.fees
+  );
+  return config;
+}
+
+export async function createInvocationTxWithSubsidy(
+  config: DoInvokeWithSubsidy
+): Promise<DoInvokeWithSubsidy> {
+  checkProperty(config, "script");
+  const processedScript =
+    typeof config.script === "object"
+      ? sc.createScript(config.script)
+      : config.script;
+  config.tx = new tx.InvocationTransaction(
+    Object.assign(
+      {
+        outputs: config.intents || [],
+        script: processedScript,
+        gas: config.gas || 0
+      },
+      config.override
+    )
+  );
+  config.tx.calculate(
+    config.subsidyBalance || new wallet.Balance(),
     undefined,
     config.fees
   );

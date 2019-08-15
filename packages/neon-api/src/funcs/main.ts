@@ -4,9 +4,10 @@ import {
   createClaimTx,
   createContractTx,
   createInvocationTx,
-  createStateTx
+  createStateTx,
+  createInvocationTxWithSubsidy
 } from "./create";
-import { fillBalance, fillClaims, fillSigningFunction, fillUrl } from "./fill";
+import { fillBalance, fillClaims, fillSigningFunction, fillUrl, fillBalanceSubsidy } from "./fill";
 import { addAttributeForMintToken, addSignatureForMintToken } from "./mint";
 import { applyTxToBalance, sendTx } from "./send";
 import { signTx } from "./sign";
@@ -18,7 +19,8 @@ import {
   ClaimGasConfig,
   DoInvokeConfig,
   SendAssetConfig,
-  SetupVoteConfig
+  SetupVoteConfig,
+  DoInvokeWithSubsidy
 } from "./types";
 
 const log = logging.default("api");
@@ -90,6 +92,23 @@ export async function doInvoke(
     .then(fillUrl)
     .then(fillBalance)
     .then(createInvocationTx)
+    .then(addAttributeIfExecutingAsSmartContract)
+    .then(addAttributeForMintToken)
+    .then(modifyTransactionForEmptyTransaction)
+    .then(signTx)
+    .then(addSignatureIfExecutingAsSmartContract)
+    .then(addSignatureForMintToken)
+    .then(sendTx)
+    .then(applyTxToBalance)
+    .catch((err: Error) => {
+      const dump = extractDump(config);
+      log.error(`doinvoke failed with: ${err.message}. Dumping config`, dump);
+      throw err;
+    });
+}
+
+export const doInvokeWithSubsidy = async (config: DoInvokeWithSubsidy) => {
+  return fillSigningFunction(config).then(fillUrl).then(fillBalance).then(fillBalanceSubsidy).then(createInvocationTxWithSubsidy)
     .then(addAttributeIfExecutingAsSmartContract)
     .then(addAttributeForMintToken)
     .then(modifyTransactionForEmptyTransaction)

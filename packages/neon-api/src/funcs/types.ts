@@ -25,6 +25,11 @@ export interface SendAssetConfig
   intents?: tx.TransactionOutput[];
 }
 
+export interface SendAssetConfigWithSubsidy extends SendAssetConfig {
+  subsidyAccount: wallet.Account;
+  subsidyBalance?: wallet.Balance;
+}
+
 export interface ClaimGasConfig
   extends ManagedApiBasicConfig<tx.ClaimTransaction> {
   claims?: wallet.Claims;
@@ -36,6 +41,11 @@ export interface DoInvokeConfig
   intents?: tx.TransactionOutput[];
   gas?: number | u.Fixed8;
   script: any;
+}
+
+export interface DoInvokeWithSubsidy extends DoInvokeConfig {
+  subsidyAccount: wallet.Account;
+  subsidyBalance?: wallet.Balance;
 }
 
 export interface SetupVoteConfig

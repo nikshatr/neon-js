@@ -4,7 +4,9 @@ import {
   ClaimGasConfig,
   DoInvokeConfig,
   ManagedApiBasicConfig,
-  SendAssetConfig
+  SendAssetConfig,
+  DoInvokeWithSubsidy,
+  SendAssetConfigWithSubsidy
 } from "./types";
 
 /**
@@ -33,6 +35,20 @@ export async function fillBalance<T extends DoInvokeConfig | SendAssetConfig>(
 ): Promise<T> {
   if (!(config.balance instanceof wallet.Balance)) {
     config.balance = await config.api.getBalance(config.account!.address);
+  }
+  return config;
+}
+
+/**
+ * Retrieves Balance if no balance has been attached
+ * @param config
+ * @return Configuration object.
+ */
+export async function fillBalanceSubsidy<T extends DoInvokeWithSubsidy | SendAssetConfigWithSubsidy>(
+  config: T
+): Promise<T> {
+  if (!(config.subsidyAccount instanceof wallet.Balance)) {
+    config.subsidyBalance = await config.api.getBalance(config.subsidyAccount!.address);
   }
   return config;
 }
